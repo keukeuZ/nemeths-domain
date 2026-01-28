@@ -1,0 +1,19 @@
+# Research notes (not part of game design)
+inspirationalfeats.md
+
+# Claude Code session data
+.claude/
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
