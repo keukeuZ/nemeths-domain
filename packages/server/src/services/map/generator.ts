@@ -181,7 +181,7 @@ function generateForsakenStrength(zone: Zone, rng: () => number): number {
   const totalWeight = FORSAKEN_TYPES.reduce((sum, t) => sum + t.weight, 0);
   let roll = rng() * totalWeight;
 
-  let selectedType = FORSAKEN_TYPES[0];
+  let selectedType: typeof FORSAKEN_TYPES[number] = FORSAKEN_TYPES[0];
   for (const type of FORSAKEN_TYPES) {
     roll -= type.weight;
     if (roll <= 0) {

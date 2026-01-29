@@ -1,6 +1,6 @@
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { db } from '../db/connection.js';
-import { alliances, allianceMembers, players, territories } from '../db/schema.js';
+import { alliances, allianceMembers, territories } from '../db/schema.js';
 import { logger } from '../utils/logger.js';
 import { getPlayerById } from './player.js';
 

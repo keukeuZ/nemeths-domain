@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import * as jose from 'jose';
 import { randomBytes } from 'crypto';
-import { eq, and, gt } from 'drizzle-orm';
+import { eq, and, lt, gt } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { authNonces, players } from '../db/schema.js';
 import { config } from '../config/index.js';
@@ -136,7 +136,7 @@ export const authService = {
   async cleanupExpiredNonces(): Promise<number> {
     const result = await db
       .delete(authNonces)
-      .where(gt(new Date(), authNonces.expiresAt));
+      .where(lt(authNonces.expiresAt, new Date()));
 
     logger.debug('Cleaned up expired nonces');
     return result.rowCount ?? 0;

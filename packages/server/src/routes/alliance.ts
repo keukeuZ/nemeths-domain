@@ -17,7 +17,7 @@ import {
   getGenerationAlliances,
 } from '../services/alliance.js';
 import { getPlayerByWallet } from '../services/player.js';
-import { getActiveGeneration } from '../services/generation.js';
+import { getCurrentGeneration } from '../services/generation.js';
 
 const router = Router();
 
@@ -45,7 +45,7 @@ const memberActionSchema = z.object({
  */
 router.get('/', authenticate, async (req, res, next) => {
   try {
-    const generation = await getActiveGeneration();
+    const generation = await getCurrentGeneration();
     if (!generation) {
       throw createAppError('No active generation', 400, 'NO_GENERATION');
     }

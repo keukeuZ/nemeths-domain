@@ -2,9 +2,10 @@ import Redis from 'ioredis';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 
-export const redis = new Redis(config.redisUrl, {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const redis = new (Redis as any)(config.redisUrl, {
   maxRetriesPerRequest: 3,
-  retryStrategy(times) {
+  retryStrategy(times: number) {
     const delay = Math.min(times * 50, 2000);
     return delay;
   },
@@ -14,7 +15,7 @@ redis.on('connect', () => {
   logger.info('Redis connected');
 });
 
-redis.on('error', (err) => {
+redis.on('error', (err: Error) => {
   logger.error({ err }, 'Redis error');
 });
 

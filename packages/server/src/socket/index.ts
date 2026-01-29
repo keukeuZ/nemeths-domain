@@ -2,10 +2,9 @@ import type { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { authService } from '../services/auth.js';
 import { logger } from '../utils/logger.js';
-import type { ClientEvents, ServerEvents } from '@nemeths/shared';
 
 // Custom socket with user data
-interface AuthenticatedSocket extends Socket<ClientEvents, ServerEvents> {
+interface AuthenticatedSocket extends Socket {
   data: {
     walletAddress?: string;
     playerId?: string;
@@ -13,10 +12,10 @@ interface AuthenticatedSocket extends Socket<ClientEvents, ServerEvents> {
   };
 }
 
-let io: Server<ClientEvents, ServerEvents>;
+let io: Server;
 
-export function initializeSocketServer(httpServer: HttpServer): Server<ClientEvents, ServerEvents> {
-  io = new Server<ClientEvents, ServerEvents>(httpServer, {
+export function initializeSocketServer(httpServer: HttpServer): Server {
+  io = new Server(httpServer, {
     cors: {
       origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
       methods: ['GET', 'POST'],
@@ -115,7 +114,7 @@ export function initializeSocketServer(httpServer: HttpServer): Server<ClientEve
   return io;
 }
 
-export function getSocketServer(): Server<ClientEvents, ServerEvents> {
+export function getSocketServer(): Server {
   if (!io) {
     throw new Error('Socket server not initialized');
   }
@@ -124,19 +123,19 @@ export function getSocketServer(): Server<ClientEvents, ServerEvents> {
 
 // Broadcast helpers
 export const broadcast = {
-  toPlayer(playerId: string, event: keyof ServerEvents, data: unknown): void {
-    io.to(`player:${playerId}`).emit(event, data as never);
+  toPlayer(playerId: string, event: string, data: unknown): void {
+    io.to(`player:${playerId}`).emit(event, data);
   },
 
-  toTerritory(territoryId: string, event: keyof ServerEvents, data: unknown): void {
-    io.to(`territory:${territoryId}`).emit(event, data as never);
+  toTerritory(territoryId: string, event: string, data: unknown): void {
+    io.to(`territory:${territoryId}`).emit(event, data);
   },
 
-  toCombat(combatId: string, event: keyof ServerEvents, data: unknown): void {
-    io.to(`combat:${combatId}`).emit(event, data as never);
+  toCombat(combatId: string, event: string, data: unknown): void {
+    io.to(`combat:${combatId}`).emit(event, data);
   },
 
-  toAll(event: keyof ServerEvents, data: unknown): void {
-    io.emit(event, data as never);
+  toAll(event: string, data: unknown): void {
+    io.emit(event, data);
   },
 };

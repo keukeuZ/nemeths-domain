@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { RACES, CAPTAIN_CLASSES, CAPTAIN_SKILLS } from '@nemeths/shared';
-import { authenticate, requirePlayer } from '../middleware/auth.js';
+import { RACES, CAPTAIN_CLASSES, CAPTAIN_SKILLS, type CaptainSkill } from '@nemeths/shared';
+import { authenticate } from '../middleware/auth.js';
 import { createAppError } from '../middleware/errorHandler.js';
 import {
   createPlayer,
@@ -99,7 +99,7 @@ router.post('/register', authenticate, async (req, res, next) => {
       race: input.race,
       captainName: input.captainName,
       captainClass: input.captainClass,
-      captainSkill: input.captainSkill as typeof allSkills[number],
+      captainSkill: input.captainSkill as CaptainSkill,
       isPremium: input.isPremium,
     });
 

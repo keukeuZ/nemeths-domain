@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
+import type { Request } from 'express';
 
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
@@ -33,11 +34,12 @@ async function main() {
   app.use(express.urlencoded({ extended: true }));
 
   // Request logging
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   app.use(
-    pinoHttp({
+    (pinoHttp as any)({
       logger,
       autoLogging: {
-        ignore: (req) => req.url === '/health/live' || req.url === '/health/ready',
+        ignore: (req: Request) => req.url === '/health/live' || req.url === '/health/ready',
       },
     })
   );

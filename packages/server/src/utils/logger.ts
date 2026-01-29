@@ -1,7 +1,8 @@
 import pino from 'pino';
 import { config } from '../config/index.js';
 
-export const logger = pino({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const logger = (pino as any)({
   level: config.logLevel,
   transport:
     config.nodeEnv === 'development'

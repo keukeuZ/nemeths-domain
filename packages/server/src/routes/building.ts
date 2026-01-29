@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { BUILDING_TYPES, BUILDING_DEFINITIONS } from '@nemeths/shared';
-import { authenticate, requirePlayer } from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 import { createAppError } from '../middleware/errorHandler.js';
 import {
   startConstruction,
@@ -19,10 +19,6 @@ const router = Router();
 const buildSchema = z.object({
   territoryId: z.string().uuid(),
   buildingType: z.enum(BUILDING_TYPES),
-});
-
-const buildingIdSchema = z.object({
-  buildingId: z.string().uuid(),
 });
 
 /**

@@ -1,6 +1,6 @@
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db/connection.js';
-import { armies, territories, buildings } from '../db/schema.js';
+import { armies, territories } from '../db/schema.js';
 import { logger } from '../utils/logger.js';
 import {
   type UnitType,
@@ -307,7 +307,7 @@ export function calculateArmyTotals(
 
   for (const unit of units) {
     const unitDef = UNIT_DEFINITIONS[unit.unitType as UnitType];
-    const unitRace = unitDef.race === 'universal' ? ownerRace : unitDef.race;
+    const _unitRace = unitDef.race === 'universal' ? ownerRace : unitDef.race;
 
     // Calculate strength based on ATK + DEF
     const unitStrength = (unitDef.atk + unitDef.def) * unit.quantity;
@@ -443,7 +443,7 @@ export async function splitArmy(
 
   for (const split of unitsToSplit) {
     const sourceUnit = source.units.find((u) => u.unitType === split.unitType && !u.isPrisoner)!;
-    const unitDef = UNIT_DEFINITIONS[split.unitType];
+    const _unitDef = UNIT_DEFINITIONS[split.unitType];
 
     // Calculate HP to transfer (proportional)
     const hpPerUnit = sourceUnit.currentHp / sourceUnit.quantity;
