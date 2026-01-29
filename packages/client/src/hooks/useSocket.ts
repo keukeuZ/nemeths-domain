@@ -4,6 +4,7 @@ import { useAuthStore, useGameStore, useMapStore, useCombatStore } from '../stor
 import type { TileData } from '../stores/mapStore';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Event types from server
 interface ServerEvents {
@@ -39,7 +40,7 @@ export function useSocket() {
   const socketRef = useRef<Socket<ServerEvents, ClientEvents> | null>(null);
   const { token, isAuthenticated } = useAuthStore();
   const { setGeneration, updateResources, updateScore } = useGameStore();
-  const { updateTile } = useMapStore();
+  const { setTiles, updateTile } = useMapStore();
   const { updateCombat, addCombat } = useCombatStore();
 
   // Initialize socket connection
@@ -153,10 +154,35 @@ export function useSocket() {
     socketRef.current?.emit('unsubscribe:map');
   }, []);
 
+  // Fetch all map tiles via REST API
+  const fetchMapTiles = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/map/tiles`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        console.error('Failed to fetch map tiles:', res.statusText);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.success && data.data?.tiles) {
+        setTiles(data.data.tiles as TileData[]);
+        console.log(`Loaded ${data.data.tiles.length} map tiles`);
+      }
+    } catch (error) {
+      console.error('Error fetching map tiles:', error);
+    }
+  }, [token, setTiles]);
+
   return {
     socket: socketRef.current,
     isConnected: socketRef.current?.connected ?? false,
     subscribeToMap,
     unsubscribeFromMap,
+    fetchMapTiles,
   };
 }

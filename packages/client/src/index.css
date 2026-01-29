@@ -2,11 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import medieval theme styles */
+@import './styles/medieval.css';
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Crimson Text', serif;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  background-color: #0D0A07;
+  color: #F5EBE0;
+}
+
+/* Ensure headings use medieval font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cinzel', serif;
 }

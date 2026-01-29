@@ -8,6 +8,7 @@ import armyRoutes from './army.js';
 import combatRoutes from './combat.js';
 import spellRoutes from './spell.js';
 import allianceRoutes from './alliance.js';
+import mapRoutes from './map.js';
 
 const router = Router();
 
@@ -21,6 +22,7 @@ router.use('/army', armyRoutes);
 router.use('/combat', combatRoutes);
 router.use('/spell', spellRoutes);
 router.use('/alliance', allianceRoutes);
+router.use('/map', mapRoutes);
 
 // API info
 router.get('/', (_req, res) => {

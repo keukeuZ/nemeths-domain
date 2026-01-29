@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
-import { useUIStore, useGameStore, useAuthStore } from '../../stores';
+import { useState, useCallback, useEffect } from 'react';
+import { useUIStore, useGameStore, useAuthStore, useMapStore } from '../../stores';
+import { useSocket } from '../../hooks/useSocket';
 import { GameMap, MapControls, Minimap } from '../map';
 import { ResourceBar } from './ResourceBar';
 import { Sidebar } from './Sidebar';
@@ -11,6 +12,22 @@ export function GameLayout() {
   const sidebarOpen = useUIStore((state) => state.sidebarOpen);
   const { isRegistered } = useGameStore();
   const { isAuthenticated } = useAuthStore();
+  const tiles = useMapStore((state) => state.tiles);
+  const { fetchMapTiles, subscribeToMap } = useSocket();
+
+  // Fetch map tiles on mount
+  useEffect(() => {
+    if (tiles.size === 0) {
+      fetchMapTiles();
+    }
+  }, [fetchMapTiles, tiles.size]);
+
+  // Subscribe to map updates after tiles are loaded
+  useEffect(() => {
+    if (tiles.size > 0) {
+      subscribeToMap();
+    }
+  }, [tiles.size, subscribeToMap]);
 
   // Handle tile click
   const handleTileClick = useCallback((x: number, y: number) => {
@@ -42,7 +59,7 @@ export function GameLayout() {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-gray-900 overflow-hidden">
+    <div className="h-screen w-screen flex flex-col bg-medieval-900 overflow-hidden">
       {/* Top bar with resources */}
       <TopBar />
 

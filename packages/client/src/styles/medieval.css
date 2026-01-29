@@ -1,0 +1,506 @@
+/* ==========================================
+   MEDIEVAL THEME STYLES
+   Fantasy medieval UI with Civ VI info density
+   ========================================== */
+
+/* ==========================================
+   BASE STYLES
+   ========================================== */
+
+/* Root variables for easy theming */
+:root {
+  --parchment-light: #F5EBE0;
+  --parchment-dark: #1A1510;
+  --gold-primary: #D4AF37;
+  --gold-light: #F5CE47;
+  --bronze-primary: #CD7F32;
+  --medieval-dark: #0D0A07;
+  --medieval-panel: #1E1914;
+
+  /* Ornate border gradients */
+  --border-gold: linear-gradient(135deg, #D4AF37 0%, #8C6F16 50%, #D4AF37 100%);
+  --border-bronze: linear-gradient(135deg, #CD7F32 0%, #663C15 50%, #CD7F32 100%);
+}
+
+/* Apply body font */
+body {
+  font-family: 'Crimson Text', serif;
+  background-color: var(--medieval-dark);
+  color: var(--parchment-light);
+}
+
+/* Headings use medieval font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+}
+
+/* ==========================================
+   ORNATE FRAMES & BORDERS
+   ========================================== */
+
+/* Basic ornate frame */
+.ornate-frame {
+  position: relative;
+  background: linear-gradient(180deg, #2D251C 0%, #1E1914 100%);
+  border: 2px solid #5A4A38;
+  border-radius: 4px;
+}
+
+.ornate-frame::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* Gold border frame */
+.frame-gold {
+  border-color: var(--gold-primary);
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.frame-gold::before {
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+/* Corner decorations (CSS-only) */
+.ornate-corners::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* ==========================================
+   PARCHMENT BACKGROUNDS
+   ========================================== */
+
+/* Parchment panel background */
+.bg-parchment-panel {
+  background: linear-gradient(
+    180deg,
+    rgba(245, 235, 224, 0.08) 0%,
+    rgba(245, 235, 224, 0.02) 100%
+  );
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+/* Darker panel variant */
+.bg-panel-dark {
+  background: linear-gradient(
+    180deg,
+    rgba(30, 25, 20, 0.95) 0%,
+    rgba(20, 17, 13, 0.98) 100%
+  );
+}
+
+/* ==========================================
+   ORNATE DIVIDERS
+   ========================================== */
+
+.divider-ornate {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.3) 15%,
+    rgba(212, 175, 55, 0.5) 50%,
+    rgba(212, 175, 55, 0.3) 85%,
+    transparent 100%
+  );
+  margin: 0.75rem 0;
+}
+
+.divider-bronze {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(205, 127, 50, 0.3) 15%,
+    rgba(205, 127, 50, 0.5) 50%,
+    rgba(205, 127, 50, 0.3) 85%,
+    transparent 100%
+  );
+}
+
+/* ==========================================
+   MEDIEVAL BUTTONS
+   ========================================== */
+
+.btn-medieval {
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+  background: linear-gradient(180deg, #3D3328 0%, #2D251C 100%);
+  border: 1px solid #5A4A38;
+  color: var(--parchment-light);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.875rem;
+}
+
+.btn-medieval:hover {
+  background: linear-gradient(180deg, #4D4438 0%, #3D3328 100%);
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.btn-medieval:active {
+  transform: translateY(1px);
+}
+
+.btn-medieval-primary {
+  background: linear-gradient(180deg, #8C6F16 0%, #5F4A10 100%);
+  border-color: var(--gold-primary);
+  color: #FDF9E8;
+}
+
+.btn-medieval-primary:hover {
+  background: linear-gradient(180deg, #B8941C 0%, #8C6F16 100%);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+.btn-medieval-danger {
+  background: linear-gradient(180deg, #6B1C1C 0%, #4A1414 100%);
+  border-color: #8B2222;
+}
+
+.btn-medieval-danger:hover {
+  background: linear-gradient(180deg, #8B2222 0%, #6B1C1C 100%);
+  border-color: #B22222;
+  box-shadow: 0 0 10px rgba(139, 34, 34, 0.4);
+}
+
+/* ==========================================
+   MEDIEVAL INPUTS
+   ========================================== */
+
+.input-medieval {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #5A4A38;
+  border-radius: 4px;
+  color: var(--parchment-light);
+  padding: 0.5rem 0.75rem;
+  font-family: 'Crimson Text', serif;
+  transition: all 0.2s ease;
+}
+
+.input-medieval:focus {
+  outline: none;
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.input-medieval::placeholder {
+  color: rgba(245, 235, 224, 0.4);
+}
+
+/* ==========================================
+   MEDIEVAL CARDS
+   ========================================== */
+
+.card-medieval {
+  background: linear-gradient(180deg, #2D251C 0%, #1E1914 100%);
+  border: 1px solid #4D4438;
+  border-radius: 4px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.card-medieval:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+}
+
+.card-medieval-header {
+  font-family: 'Cinzel', serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gold-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+/* ==========================================
+   SCROLLBARS
+   ========================================== */
+
+/* Custom scrollbar for webkit browsers */
+.scrollbar-medieval::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scrollbar-medieval::-webkit-scrollbar-track {
+  background: #1E1914;
+  border-radius: 4px;
+}
+
+.scrollbar-medieval::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #5A4A38 0%, #3D3328 100%);
+  border-radius: 4px;
+  border: 2px solid #1E1914;
+}
+
+.scrollbar-medieval::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6B5A48 0%, #4D4338 100%);
+}
+
+/* Firefox scrollbar */
+.scrollbar-medieval {
+  scrollbar-width: thin;
+  scrollbar-color: #5A4A38 #1E1914;
+}
+
+/* ==========================================
+   TOOLTIPS
+   ========================================== */
+
+.tooltip-medieval {
+  background: linear-gradient(180deg, #2D251C 0%, #1E1914 100%);
+  border: 1px solid var(--gold-primary);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  box-shadow:
+    0 0 15px rgba(0, 0, 0, 0.5),
+    0 0 5px rgba(212, 175, 55, 0.3);
+}
+
+/* ==========================================
+   BADGE STYLES
+   ========================================== */
+
+.badge-medieval {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 2px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--gold-primary);
+}
+
+.badge-zone-outer {
+  background: rgba(74, 103, 65, 0.2);
+  border-color: rgba(74, 103, 65, 0.4);
+  color: #6B9B5C;
+}
+
+.badge-zone-middle {
+  background: rgba(107, 92, 74, 0.2);
+  border-color: rgba(107, 92, 74, 0.4);
+  color: #9B8C74;
+}
+
+.badge-zone-inner {
+  background: rgba(139, 69, 19, 0.2);
+  border-color: rgba(139, 69, 19, 0.4);
+  color: #C97B2A;
+}
+
+.badge-zone-heart {
+  background: rgba(74, 26, 26, 0.2);
+  border-color: rgba(139, 34, 34, 0.4);
+  color: #C44A4A;
+}
+
+/* ==========================================
+   PROGRESS BARS
+   ========================================== */
+
+.progress-medieval {
+  height: 8px;
+  background: #1E1914;
+  border: 1px solid #3D3328;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-medieval-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #5F4A10 0%, var(--gold-primary) 50%, #5F4A10 100%);
+  background-size: 200% 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-medieval-fill.animate {
+  animation: shimmer 2s linear infinite;
+}
+
+/* Resource-specific progress colors */
+.progress-gold .progress-medieval-fill {
+  background: linear-gradient(90deg, #8C6F16 0%, #D4AF37 50%, #8C6F16 100%);
+}
+
+.progress-stone .progress-medieval-fill {
+  background: linear-gradient(90deg, #4A4A4A 0%, #7A7A7A 50%, #4A4A4A 100%);
+}
+
+.progress-wood .progress-medieval-fill {
+  background: linear-gradient(90deg, #4A3020 0%, #8B5A3A 50%, #4A3020 100%);
+}
+
+.progress-food .progress-medieval-fill {
+  background: linear-gradient(90deg, #3A5A2A 0%, #6B8B4A 50%, #3A5A2A 100%);
+}
+
+.progress-mana .progress-medieval-fill {
+  background: linear-gradient(90deg, #2A3A6A 0%, #4A6ABA 50%, #2A3A6A 100%);
+}
+
+/* ==========================================
+   GLOW EFFECTS
+   ========================================== */
+
+.glow-gold {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+.glow-gold-pulse {
+  animation: pulse-gold 2s ease-in-out infinite;
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.7);
+  }
+}
+
+/* Territory ownership glow */
+.territory-owned {
+  box-shadow:
+    0 0 0 2px rgba(212, 175, 55, 0.8),
+    0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.territory-ally {
+  box-shadow:
+    0 0 0 2px rgba(74, 103, 65, 0.8),
+    0 0 10px rgba(74, 103, 65, 0.4);
+}
+
+.territory-enemy {
+  box-shadow:
+    0 0 0 2px rgba(139, 34, 34, 0.8),
+    0 0 10px rgba(139, 34, 34, 0.4);
+}
+
+/* ==========================================
+   TRANSITIONS & ANIMATIONS
+   ========================================== */
+
+/* Panel slide transitions */
+.panel-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.panel-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.panel-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.panel-exit-active {
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Modal fade */
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+/* Selection bounce */
+.select-bounce {
+  animation: bounce-subtle 0.3s ease-out;
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* ==========================================
+   LOADING SPINNER
+   ========================================== */
+
+.spinner-medieval {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(212, 175, 55, 0.2);
+  border-top-color: var(--gold-primary);
+  border-radius: 50%;
+  animation: spin-medieval 1s linear infinite;
+}
+
+@keyframes spin-medieval {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================
+   UTILITY CLASSES
+   ========================================== */
+
+.text-gold {
+  color: var(--gold-primary);
+}
+
+.text-bronze {
+  color: var(--bronze-primary);
+}
+
+.text-parchment {
+  color: var(--parchment-light);
+}
+
+.border-gold {
+  border-color: var(--gold-primary);
+}
+
+.border-bronze {
+  border-color: var(--bronze-primary);
+}
+
+/* Medieval text shadow */
+.text-shadow-medieval {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Uppercase tracking for headers */
+.tracking-medieval {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}

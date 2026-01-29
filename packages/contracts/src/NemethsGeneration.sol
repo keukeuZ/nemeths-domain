@@ -101,6 +101,9 @@ contract NemethsGeneration is Ownable, ReentrancyGuard {
     /// @notice Server oracle address (for off-chain game state updates)
     address public serverOracle;
 
+    /// @notice Referral registry contract
+    address public referralRegistry;
+
     // ==========================================
     // EVENTS
     // ==========================================
@@ -282,6 +285,14 @@ contract NemethsGeneration is Ownable, ReentrancyGuard {
         treasury = _treasury;
     }
 
+    /**
+     * @notice Set referral registry contract
+     */
+    function setReferralRegistry(address _referralRegistry) external onlyOwner {
+        if (_referralRegistry == address(0)) revert ZeroAddress();
+        referralRegistry = _referralRegistry;
+    }
+
     // ==========================================
     // PLAYER REGISTRATION
     // ==========================================
@@ -315,6 +326,33 @@ contract NemethsGeneration is Ownable, ReentrancyGuard {
         uint8 captainClass,
         uint8 captainSkill
     ) external nonReentrant {
+        _processPremiumPayment("");
+        _register(captainName, race, captainClass, captainSkill, true);
+    }
+
+    /**
+     * @notice Register as a premium player with referral code
+     * @param captainName Captain's name (max 32 chars)
+     * @param race Race selection (0-5)
+     * @param captainClass Class selection (0-5)
+     * @param captainSkill Skill selection (must match class)
+     * @param referralCode Referral code (optional, empty string if none)
+     */
+    function registerPremiumWithReferral(
+        string calldata captainName,
+        uint8 race,
+        uint8 captainClass,
+        uint8 captainSkill,
+        string calldata referralCode
+    ) external nonReentrant {
+        _processPremiumPayment(referralCode);
+        _register(captainName, race, captainClass, captainSkill, true);
+    }
+
+    /**
+     * @notice Internal function to process premium payment
+     */
+    function _processPremiumPayment(string memory referralCode) internal {
         // Check USDC allowance
         if (usdc.allowance(msg.sender, address(this)) < PREMIUM_FEE) {
             revert InsufficientAllowance();
@@ -326,7 +364,21 @@ contract NemethsGeneration is Ownable, ReentrancyGuard {
         // Add to prize pool
         generations[currentGenerationId].prizePool += PREMIUM_FEE;
 
-        _register(captainName, race, captainClass, captainSkill, true);
+        // Record referral if code provided and registry is set
+        if (bytes(referralCode).length > 0 && referralRegistry != address(0)) {
+            // Call referral registry to record (it handles validation)
+            // Using low-level call to avoid reverting if referral fails
+            (bool success, ) = referralRegistry.call(
+                abi.encodeWithSignature(
+                    "recordReferral(address,string,uint256)",
+                    msg.sender,
+                    referralCode,
+                    PREMIUM_FEE
+                )
+            );
+            // Silently ignore referral failures - registration should still succeed
+            success; // Suppress unused variable warning
+        }
     }
 
     /**

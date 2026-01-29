@@ -7,6 +7,11 @@ import "../src/TitansWitness.sol";
 import "../src/Plots.sol";
 import "../src/CombatSystem.sol";
 import "../src/VRFConsumer.sol";
+import "../src/NemethsMedals.sol";
+import "../src/NemethsSeasonPass.sol";
+import "../src/AllianceBanner.sol";
+import "../src/ReferralRegistry.sol";
+import "../src/NemethsGov.sol";
 
 /**
  * @title DeployScript
@@ -36,12 +41,19 @@ contract DeployScript is Script {
     address constant BASE_MAINNET_VRF_COORDINATOR = 0xd5D517aBE5cF79B7e95eC98dB0f0277788aFF634;
     bytes32 constant BASE_MAINNET_VRF_KEYHASH = 0xdc2f87677b01473c763cb0aee938ed3341512f6057324a584e5944e786144d70;
 
-    // Deployed contract addresses
+    // Core contracts
     NemethsGeneration public generation;
     TitansWitness public witness;
     Plots public plots;
     CombatSystem public combat;
     VRFConsumer public vrf;
+
+    // New feature contracts
+    NemethsMedals public medals;
+    NemethsSeasonPass public seasonPass;
+    AllianceBanner public allianceBanner;
+    ReferralRegistry public referralRegistry;
+    NemethsGov public govToken;
 
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -58,41 +70,78 @@ contract DeployScript is Script {
         address vrfCoordinator = isMainnet ? BASE_MAINNET_VRF_COORDINATOR : BASE_SEPOLIA_VRF_COORDINATOR;
         bytes32 vrfKeyHash = isMainnet ? BASE_MAINNET_VRF_KEYHASH : BASE_SEPOLIA_VRF_KEYHASH;
 
-        console.log("Deploying to:", isMainnet ? "Base Mainnet" : "Base Sepolia");
+        console.log("=== NEMETHS DOMAIN FULL DEPLOYMENT ===");
+        console.log("Network:", isMainnet ? "Base Mainnet" : "Base Sepolia");
         console.log("Treasury:", treasury);
         console.log("USDC:", usdc);
+        console.log("");
 
         vm.startBroadcast(deployerPrivateKey);
 
+        // ==========================================
+        // CORE CONTRACTS
+        // ==========================================
+        console.log("--- Deploying Core Contracts ---");
+
         // 1. Deploy TitansWitness (eternal leaderboard)
         witness = new TitansWitness();
-        console.log("TitansWitness deployed at:", address(witness));
+        console.log("TitansWitness:", address(witness));
 
         // 2. Deploy NemethsGeneration (game manager)
         generation = new NemethsGeneration(usdc, treasury);
-        console.log("NemethsGeneration deployed at:", address(generation));
+        console.log("NemethsGeneration:", address(generation));
 
         // 3. Deploy Plots (territory NFTs)
         plots = new Plots();
-        console.log("Plots deployed at:", address(plots));
+        console.log("Plots:", address(plots));
 
         // 4. Deploy VRFConsumer (randomness)
         vrf = new VRFConsumer(vrfCoordinator, vrfSubscriptionId, vrfKeyHash);
-        console.log("VRFConsumer deployed at:", address(vrf));
+        console.log("VRFConsumer:", address(vrf));
 
         // 5. Deploy CombatSystem
         combat = new CombatSystem(address(plots));
-        console.log("CombatSystem deployed at:", address(combat));
+        console.log("CombatSystem:", address(combat));
 
-        // 6. Link contracts together
-        console.log("Linking contracts...");
+        // ==========================================
+        // FEATURE CONTRACTS
+        // ==========================================
+        console.log("");
+        console.log("--- Deploying Feature Contracts ---");
+
+        // 6. Deploy NemethsMedals (achievement NFTs)
+        medals = new NemethsMedals();
+        console.log("NemethsMedals:", address(medals));
+
+        // 7. Deploy NemethsSeasonPass (season passes)
+        seasonPass = new NemethsSeasonPass(usdc, treasury);
+        console.log("NemethsSeasonPass:", address(seasonPass));
+
+        // 8. Deploy AllianceBanner (alliance NFTs)
+        allianceBanner = new AllianceBanner(treasury);
+        console.log("AllianceBanner:", address(allianceBanner));
+
+        // 9. Deploy ReferralRegistry
+        referralRegistry = new ReferralRegistry(usdc);
+        console.log("ReferralRegistry:", address(referralRegistry));
+
+        // 10. Deploy NemethsGov (governance token)
+        govToken = new NemethsGov();
+        console.log("NemethsGov:", address(govToken));
+
+        // ==========================================
+        // LINK CONTRACTS
+        // ==========================================
+        console.log("");
+        console.log("--- Linking Contracts ---");
 
         // TitansWitness -> NemethsGeneration
         witness.setGenerationContract(address(generation));
 
-        // NemethsGeneration -> Plots, TitansWitness
+        // NemethsGeneration -> All dependencies
         generation.setPlotsContract(address(plots));
         generation.setTitansWitness(address(witness));
+        generation.setReferralRegistry(address(referralRegistry));
 
         // Plots -> NemethsGeneration, CombatSystem
         plots.setGenerationContract(address(generation));
@@ -104,30 +153,61 @@ contract DeployScript is Script {
         // VRFConsumer -> CombatSystem
         vrf.setCombatSystem(address(combat));
 
-        console.log("All contracts deployed and linked!");
+        // ReferralRegistry -> NemethsGeneration
+        referralRegistry.setGenerationContract(address(generation));
+
+        // Set minters for Medals (will be called by game server)
+        // medals.setMinter(serverOracle, true); // Set after server oracle is known
+
+        console.log("All contracts linked!");
 
         vm.stopBroadcast();
 
         // Output deployment summary
-        _logDeploymentSummary();
+        _logDeploymentSummary(usdc);
     }
 
-    function _logDeploymentSummary() internal view {
+    function _logDeploymentSummary(address usdc) internal view {
         console.log("");
-        console.log("=== DEPLOYMENT SUMMARY ===");
+        console.log("==========================================");
+        console.log("       DEPLOYMENT SUMMARY");
+        console.log("==========================================");
         console.log("");
-        console.log("NemethsGeneration:", address(generation));
-        console.log("TitansWitness:", address(witness));
-        console.log("Plots:", address(plots));
-        console.log("CombatSystem:", address(combat));
-        console.log("VRFConsumer:", address(vrf));
+        console.log("CORE CONTRACTS:");
+        console.log("  NemethsGeneration:", address(generation));
+        console.log("  TitansWitness:    ", address(witness));
+        console.log("  Plots:            ", address(plots));
+        console.log("  CombatSystem:     ", address(combat));
+        console.log("  VRFConsumer:      ", address(vrf));
         console.log("");
-        console.log("=== NEXT STEPS ===");
-        console.log("1. Add VRFConsumer to Chainlink VRF subscription as consumer");
-        console.log("2. Set server oracle address: generation.setServerOracle(address)");
-        console.log("3. Set combat server oracle: combat.setServerOracle(address)");
-        console.log("4. Set plots base URI: plots.setBaseURI(uri)");
-        console.log("5. Start first generation: generation.startGeneration()");
+        console.log("FEATURE CONTRACTS:");
+        console.log("  NemethsMedals:    ", address(medals));
+        console.log("  NemethsSeasonPass:", address(seasonPass));
+        console.log("  AllianceBanner:   ", address(allianceBanner));
+        console.log("  ReferralRegistry: ", address(referralRegistry));
+        console.log("  NemethsGov:       ", address(govToken));
+        console.log("");
+        console.log("EXTERNAL:");
+        console.log("  USDC:             ", usdc);
+        console.log("");
+        console.log("==========================================");
+        console.log("       NEXT STEPS");
+        console.log("==========================================");
+        console.log("");
+        console.log("1. Add VRFConsumer to Chainlink VRF subscription");
+        console.log("2. Set server oracle:");
+        console.log("   generation.setServerOracle(address)");
+        console.log("   combat.setServerOracle(address)");
+        console.log("3. Set minters for Medals:");
+        console.log("   medals.setMinter(serverOracle, true)");
+        console.log("4. Set minters for Governance token:");
+        console.log("   govToken.setMinter(serverOracle, true)");
+        console.log("5. Set minters for Alliance Banner:");
+        console.log("   allianceBanner.setMinter(serverOracle, true)");
+        console.log("6. Start first season:");
+        console.log("   seasonPass.startSeason(90, 5e6, 15e6, 40e6, 100e6)");
+        console.log("7. Start first generation:");
+        console.log("   generation.startGeneration()");
         console.log("");
     }
 }
@@ -145,38 +225,130 @@ contract DeployTestnet is Script {
 
         // Deploy mock USDC for testing
         MockUSDC usdc = new MockUSDC();
-        console.log("MockUSDC deployed at:", address(usdc));
+        console.log("MockUSDC:", address(usdc));
 
-        // Deploy TitansWitness
+        // ==========================================
+        // CORE CONTRACTS
+        // ==========================================
+
         TitansWitness witness = new TitansWitness();
-        console.log("TitansWitness deployed at:", address(witness));
+        console.log("TitansWitness:", address(witness));
 
-        // Deploy NemethsGeneration with mock USDC
         NemethsGeneration generation = new NemethsGeneration(address(usdc), deployer);
-        console.log("NemethsGeneration deployed at:", address(generation));
+        console.log("NemethsGeneration:", address(generation));
 
-        // Deploy Plots
         Plots plots = new Plots();
-        console.log("Plots deployed at:", address(plots));
+        console.log("Plots:", address(plots));
 
-        // Deploy CombatSystem (no VRF for testing)
         CombatSystem combat = new CombatSystem(address(plots));
-        console.log("CombatSystem deployed at:", address(combat));
+        console.log("CombatSystem:", address(combat));
 
-        // Link contracts
+        // ==========================================
+        // FEATURE CONTRACTS
+        // ==========================================
+
+        NemethsMedals medals = new NemethsMedals();
+        console.log("NemethsMedals:", address(medals));
+
+        NemethsSeasonPass seasonPass = new NemethsSeasonPass(address(usdc), deployer);
+        console.log("NemethsSeasonPass:", address(seasonPass));
+
+        AllianceBanner allianceBanner = new AllianceBanner(deployer);
+        console.log("AllianceBanner:", address(allianceBanner));
+
+        ReferralRegistry referralRegistry = new ReferralRegistry(address(usdc));
+        console.log("ReferralRegistry:", address(referralRegistry));
+
+        NemethsGov govToken = new NemethsGov();
+        console.log("NemethsGov:", address(govToken));
+
+        // ==========================================
+        // LINK CONTRACTS
+        // ==========================================
+
         witness.setGenerationContract(address(generation));
         generation.setPlotsContract(address(plots));
         generation.setTitansWitness(address(witness));
-        generation.setServerOracle(deployer); // Set deployer as oracle for testing
+        generation.setReferralRegistry(address(referralRegistry));
+        generation.setServerOracle(deployer);
         plots.setGenerationContract(address(generation));
         plots.setCombatContract(address(combat));
         combat.setServerOracle(deployer);
+        referralRegistry.setGenerationContract(address(generation));
 
-        // Mint test USDC to deployer
+        // Set deployer as minter for all
+        medals.setMinter(deployer, true);
+        allianceBanner.setMinter(deployer, true);
+        govToken.setMinter(deployer, true);
+
+        // Mint test USDC
         usdc.mint(deployer, 1000000 * 10**6); // 1M USDC
 
+        // Start a test season
+        seasonPass.startSeason(
+            90,         // 90 days
+            5e6,        // Bronze: $5
+            15e6,       // Silver: $15
+            40e6,       // Gold: $40
+            100e6       // Titan: $100
+        );
+
+        // Deposit USDC to referral registry for rewards
+        usdc.approve(address(referralRegistry), 10000e6);
+        referralRegistry.depositRewards(10000e6);
+
+        console.log("");
         console.log("Test deployment complete!");
         console.log("Deployer has 1M test USDC");
+        console.log("Season 1 started (90 days)");
+        console.log("Referral registry funded with 10k USDC");
+
+        vm.stopBroadcast();
+    }
+}
+
+/**
+ * @title DeployFeatureOnly
+ * @notice Deploy only the new feature contracts (for upgrading existing deployment)
+ */
+contract DeployFeatureOnly is Script {
+    function run() public {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address treasury = vm.envAddress("TREASURY_ADDRESS");
+        address generationContract = vm.envAddress("GENERATION_CONTRACT");
+
+        bool isMainnet = block.chainid == 8453;
+        address usdc = isMainnet
+            ? 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+            : 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
+
+        console.log("Deploying feature contracts only...");
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        NemethsMedals medals = new NemethsMedals();
+        console.log("NemethsMedals:", address(medals));
+
+        NemethsSeasonPass seasonPass = new NemethsSeasonPass(usdc, treasury);
+        console.log("NemethsSeasonPass:", address(seasonPass));
+
+        AllianceBanner allianceBanner = new AllianceBanner(treasury);
+        console.log("AllianceBanner:", address(allianceBanner));
+
+        ReferralRegistry referralRegistry = new ReferralRegistry(usdc);
+        console.log("ReferralRegistry:", address(referralRegistry));
+
+        NemethsGov govToken = new NemethsGov();
+        console.log("NemethsGov:", address(govToken));
+
+        // Link referral registry to generation
+        referralRegistry.setGenerationContract(generationContract);
+
+        console.log("");
+        console.log("Feature contracts deployed!");
+        console.log("Remember to:");
+        console.log("1. Call generation.setReferralRegistry(", address(referralRegistry), ")");
+        console.log("2. Set minters for medals, banner, govToken");
 
         vm.stopBroadcast();
     }
