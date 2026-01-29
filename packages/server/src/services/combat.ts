@@ -15,6 +15,13 @@ import { getPlayerById, woundCaptain, killCaptain } from './player.js';
 import { getArmyById, type ArmyInfo, calculateArmyTotals } from './army.js';
 import { getBuildingsInTerritory } from './building.js';
 import { isPvPEnabled, getCurrentGeneration, hasNewPlayerProtection } from './generation.js';
+import {
+  notifyAttackIncoming,
+  notifyCombatStarted,
+  notifyCombatEnded,
+  notifyCaptainWounded,
+  notifyCaptainDied,
+} from './notification.js';
 
 // ==========================================
 // COMBAT SERVICE
@@ -420,6 +427,17 @@ export async function initiateCombat(
     'Combat initiated'
   );
 
+  // Notify defender about incoming attack (if PvP, not Forsaken)
+  if (territory.ownerId && territory.ownerId !== attackerPlayerId) {
+    notifyAttackIncoming({
+      defenderId: territory.ownerId,
+      targetTerritoryId,
+      attackerRace: attacker.race,
+      armyStrength: attackerArmy.totalStrength,
+      estimatedArrivalMs: 60 * 1000, // 1 minute delay
+    });
+  }
+
   return combat.id;
 }
 
@@ -626,6 +644,33 @@ export async function resolveCombat(combatId: string): Promise<CombatResult> {
     },
     'Combat resolved'
   );
+
+  // Send notifications to both parties
+  const winnerId = winner === 'attacker' ? combat.attackerId :
+                   winner === 'defender' ? combat.defenderId : null;
+
+  notifyCombatEnded({
+    combat: {
+      id: combatId,
+      attackerId: combat.attackerId,
+      defenderId: combat.defenderId,
+      territoryId: combat.territoryId,
+      status: 'completed',
+      result: winner,
+    } as any,
+    attackerId: combat.attackerId,
+    defenderId: combat.defenderId,
+    winnerId,
+    territoryId: combat.territoryId,
+  });
+
+  // Notify about captain status changes
+  if (attackerCaptainDied) {
+    notifyCaptainDied(combat.attackerId);
+  }
+  if (defenderCaptainDied && defender) {
+    notifyCaptainDied(combat.defenderId);
+  }
 
   return {
     id: combatId,
