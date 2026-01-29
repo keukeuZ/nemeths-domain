@@ -23,7 +23,7 @@ import {
   VAELTHIR_MANA_BONUS,
   VAELTHIR_MANA_CAP_BONUS,
 } from '@nemeths/shared';
-import { getPlayerById } from './player.js';
+import { getPlayerById, deductResourcesAtomic } from './player.js';
 
 // ==========================================
 // SPELL SERVICE - D20 WEIGHTED SYSTEM
@@ -323,10 +323,10 @@ export async function castSpell(
     duration = Math.floor(spell.durationHours * rollResult.durationMultiplier);
   }
 
-  // Deduct mana
+  // Calculate mana to spend (including mishap modifications)
   let manaSpent = spell.manaCost;
 
-  // Handle mishaps
+  // Handle mishaps that modify mana cost
   if (rollResult.mishap) {
     switch (rollResult.mishap.roll) {
       case 2: // Mana Drain - lose additional 50%
@@ -336,15 +336,8 @@ export async function castSpell(
     }
   }
 
-  // Update player mana
-  const newMana = Math.max(0, player.resources.mana - manaSpent);
-  await db
-    .update(players)
-    .set({
-      resources: { ...player.resources, mana: newMana },
-      updatedAt: new Date(),
-    })
-    .where(eq(players.id, playerId));
+  // Atomically deduct mana (prevents race conditions)
+  await deductResourcesAtomic(playerId, { mana: manaSpent });
 
   // Set cooldown
   if (spell.cooldownHours > 0) {

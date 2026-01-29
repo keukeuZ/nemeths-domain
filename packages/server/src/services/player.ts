@@ -1,5 +1,5 @@
-import { eq, and } from 'drizzle-orm';
-import { db } from '../db/connection.js';
+import { eq, and, sql } from 'drizzle-orm';
+import { db, pool } from '../db/connection.js';
 import { players, territories, armies } from '../db/schema.js';
 import { logger } from '../utils/logger.js';
 import {
@@ -281,6 +281,7 @@ export function canAfford(playerResources: Resources, cost: Partial<Resources>):
 
 /**
  * Deduct resources from player (use after canAfford check)
+ * WARNING: Not atomic - prefer deductResourcesAtomic for race-condition safety
  */
 export async function deductResources(
   playerId: string,
@@ -293,6 +294,138 @@ export async function deductResources(
     food: -(cost.food || 0),
     mana: -(cost.mana || 0),
   });
+}
+
+/**
+ * Atomically check and deduct resources using database transaction with row locking
+ * This prevents race conditions where two requests could spend the same resources
+ *
+ * @returns Updated resources if successful
+ * @throws Error if player not found or insufficient resources
+ */
+export async function deductResourcesAtomic(
+  playerId: string,
+  cost: Partial<Resources>
+): Promise<Resources> {
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Lock the player row for update - prevents concurrent modifications
+    const lockResult = await client.query(
+      'SELECT resources FROM players WHERE id = $1 FOR UPDATE',
+      [playerId]
+    );
+
+    if (lockResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      throw new Error('Player not found');
+    }
+
+    const currentResources = lockResult.rows[0].resources as Resources;
+
+    // Check if can afford
+    if (cost.gold && currentResources.gold < cost.gold) {
+      await client.query('ROLLBACK');
+      throw new Error('Insufficient gold');
+    }
+    if (cost.stone && currentResources.stone < cost.stone) {
+      await client.query('ROLLBACK');
+      throw new Error('Insufficient stone');
+    }
+    if (cost.wood && currentResources.wood < cost.wood) {
+      await client.query('ROLLBACK');
+      throw new Error('Insufficient wood');
+    }
+    if (cost.food && currentResources.food < cost.food) {
+      await client.query('ROLLBACK');
+      throw new Error('Insufficient food');
+    }
+    if (cost.mana && currentResources.mana < cost.mana) {
+      await client.query('ROLLBACK');
+      throw new Error('Insufficient mana');
+    }
+
+    // Calculate new resources
+    const newResources: Resources = {
+      gold: currentResources.gold - (cost.gold || 0),
+      stone: currentResources.stone - (cost.stone || 0),
+      wood: currentResources.wood - (cost.wood || 0),
+      food: currentResources.food - (cost.food || 0),
+      mana: currentResources.mana - (cost.mana || 0),
+    };
+
+    // Update resources
+    await client.query(
+      'UPDATE players SET resources = $1, updated_at = NOW() WHERE id = $2',
+      [JSON.stringify(newResources), playerId]
+    );
+
+    await client.query('COMMIT');
+
+    logger.debug({ playerId, cost, newResources }, 'Resources deducted atomically');
+
+    return newResources;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Atomically add resources using database transaction with row locking
+ */
+export async function addResourcesAtomic(
+  playerId: string,
+  amount: Partial<Resources>,
+  options?: { maxMana?: number }
+): Promise<Resources> {
+  const client = await pool.connect();
+  const maxMana = options?.maxMana ?? 200;
+
+  try {
+    await client.query('BEGIN');
+
+    // Lock the player row for update
+    const lockResult = await client.query(
+      'SELECT resources FROM players WHERE id = $1 FOR UPDATE',
+      [playerId]
+    );
+
+    if (lockResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      throw new Error('Player not found');
+    }
+
+    const currentResources = lockResult.rows[0].resources as Resources;
+
+    // Calculate new resources (with mana cap)
+    const newResources: Resources = {
+      gold: currentResources.gold + (amount.gold || 0),
+      stone: currentResources.stone + (amount.stone || 0),
+      wood: currentResources.wood + (amount.wood || 0),
+      food: currentResources.food + (amount.food || 0),
+      mana: Math.min(maxMana, currentResources.mana + (amount.mana || 0)),
+    };
+
+    // Update resources
+    await client.query(
+      'UPDATE players SET resources = $1, updated_at = NOW() WHERE id = $2',
+      [JSON.stringify(newResources), playerId]
+    );
+
+    await client.query('COMMIT');
+
+    return newResources;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 /**

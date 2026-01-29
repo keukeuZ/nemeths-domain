@@ -9,7 +9,7 @@ import {
   MAX_BUILDINGS_PER_TERRITORY,
   MAX_CONCURRENT_BUILDS,
 } from '@nemeths/shared';
-import { getPlayerById, canAfford, deductResources } from './player.js';
+import { getPlayerById, deductResourcesAtomic } from './player.js';
 
 // ==========================================
 // BUILDING SERVICE
@@ -212,13 +212,9 @@ export async function startConstruction(
     throw new Error(limitCheck.reason);
   }
 
-  // Check and deduct resources
+  // Atomically check and deduct resources (prevents race conditions)
   const cost = await getBuildingCost(playerId, buildingType);
-  if (!canAfford(player.resources, cost)) {
-    throw new Error('Insufficient resources');
-  }
-
-  await deductResources(playerId, cost);
+  await deductResourcesAtomic(playerId, cost);
 
   // Calculate construction time
   const hours = getBuildingTime(buildingType, player.race, player.captainSkill);
@@ -363,21 +359,8 @@ export async function repairBuilding(
   const baseCost = (definition.cost.gold || 0) + (definition.cost.stone || 0);
   const repairCost = Math.floor(baseCost * costPercent);
 
-  const player = await getPlayerById(playerId);
-  if (!player) throw new Error('Player not found');
-
-  if (player.resources.gold < repairCost) {
-    throw new Error('Insufficient gold for repair');
-  }
-
-  // Deduct cost and repair
-  await db
-    .update(players)
-    .set({
-      resources: { ...player.resources, gold: player.resources.gold - repairCost },
-      updatedAt: new Date(),
-    })
-    .where(eq(players.id, playerId));
+  // Atomically deduct gold for repair (prevents race conditions)
+  await deductResourcesAtomic(playerId, { gold: repairCost });
 
   await db
     .update(buildings)

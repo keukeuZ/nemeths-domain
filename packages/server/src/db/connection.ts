@@ -1,10 +1,13 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { sql } from 'drizzle-orm';
 import pg from 'pg';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import * as schema from './schema.js';
 
 const { Pool } = pg;
+
+export type TransactionClient = typeof db;
 
 const pool = new Pool({
   connectionString: config.databaseUrl,
@@ -40,4 +43,4 @@ export async function disconnectDatabase(): Promise<void> {
   logger.info('Database connection pool closed');
 }
 
-export { pool };
+export { pool, sql };

@@ -10,7 +10,7 @@ import {
   FOOD_RATES,
   getUnitsForRace,
 } from '@nemeths/shared';
-import { getPlayerById, canAfford, deductResources } from './player.js';
+import { getPlayerById, deductResourcesAtomic } from './player.js';
 import { getBuildingsInTerritory } from './building.js';
 
 // ==========================================
@@ -209,14 +209,9 @@ export async function trainUnits(
     throw new Error(trainCheck.reason);
   }
 
-  // Calculate and check cost
+  // Calculate cost and atomically deduct resources (prevents race conditions)
   const cost = getTrainingCost(unitType, quantity, player.race);
-  if (!canAfford(player.resources, cost)) {
-    throw new Error('Insufficient resources');
-  }
-
-  // Deduct resources
-  await deductResources(playerId, cost);
+  await deductResourcesAtomic(playerId, cost);
 
   // Get or create garrison
   let garrison = await getGarrison(playerId, territoryId);
