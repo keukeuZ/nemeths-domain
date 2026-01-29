@@ -1,0 +1,33 @@
+{
+  "name": "@nemeths/simulation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsx watch src/cli/simulate.ts",
+    "build": "tsc",
+    "start": "node dist/cli/simulate.js",
+    "clean": "rm -rf dist",
+    "simulate": "tsx src/cli/simulate.ts",
+    "balance-check": "tsx src/cli/balance-check.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@nemeths/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}
