@@ -1,19 +1,67 @@
-# Research notes (not part of game design)
-inspirationalfeats.md
+# ==========================================
+# NEMETHS DOMAIN - GITIGNORE
+# ==========================================
 
-# Claude Code session data
-.claude/
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+
+# TypeScript
+*.tsbuildinfo
 
 # Environment and secrets
 .env
 .env.*
+!.env.example
 *.key
 *.pem
 
-# OS files
-.DS_Store
-Thumbs.db
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Turbo
+.turbo/
+
+# Foundry (contracts)
+packages/contracts/cache/
+packages/contracts/out/
+packages/contracts/broadcast/*/31337/
+packages/contracts/broadcast/**/dry-run/
+
+# Database
+*.sqlite
+*.db
+
+# Docker volumes (local)
+.docker-data/
+
+# Claude Code session data
+.claude/
+CLAUDE.md
+
+# Research notes (not part of game design)
+docs/inspirationalfeats.md

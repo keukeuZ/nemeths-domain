@@ -38,7 +38,7 @@ Units require food based on their race. This creates distinct economic profiles.
 |------|---------|---------|---------|
 | **Ironveld** | Building Durability +25% | Construction Speed | Mine +15% output |
 | **Vaelthir** | Magic Power +30% | Mana Regeneration | Free Daily Spell |
-| **Korrath** | Blood Frenzy (+10% ATK/24h) | Battle Loot (+30%) | Prisoner Capture +5% |
+| **Korrath** | Blood Frenzy (+35% ATK) | Battle Loot (+30%) | Prisoner Capture +5% |
 | **Sylvaeth** | Scout Range (+50%) | Intel Always Accurate | Reputation Gain (+25%) |
 | **Ashborn** | Reformation (25% reform) | Curse Damage | Captain Death Saves +2 |
 | **Breath-Born** | Movement Speed +15% | Windshear (delay) | Evasion 20% |
@@ -51,7 +51,7 @@ Units require food based on their race. This creates distinct economic profiles.
 |------|-----------|-----------|
 | **Ironveld** | Army Movement Speed -25% | Slowest units (SPD 0.5-1) |
 | **Vaelthir** | Physical Defense -20% | Unit Cost +15% |
-| **Korrath** | Defense when stationary -10% | Alliance trust harder to build |
+| **Korrath** | Alliance trust harder to build | Must attack regularly (morale decay if idle) |
 | **Sylvaeth** | Attack Power -30% | Cannot build Siege Workshop |
 | **Ashborn** | Resource Production -15% | No Healing Effects |
 | **Breath-Born** | Structure Decay (1%/day) | Defense When Stationary -15% |

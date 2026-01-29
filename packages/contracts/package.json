@@ -1,0 +1,15 @@
+{
+  "name": "@nemeths/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "test:gas": "forge test --gas-report",
+    "test:coverage": "forge coverage",
+    "clean": "forge clean",
+    "deploy:local": "forge script script/Deploy.s.sol --rpc-url http://localhost:8545 --broadcast",
+    "deploy:sepolia": "forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --verify",
+    "anvil": "anvil --fork-url $BASE_SEPOLIA_RPC"
+  }
+}

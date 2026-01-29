@@ -285,7 +285,7 @@ Walls and Fortresses require **siege weapons** to damage efficiently.
 |------|--------------|----------------|
 | **Ironveld** | Structures +50% HP | Army SPD -15% |
 | **Vaelthir** | Magic damage +25% | Physical DEF -20% |
-| **Korrath** | ATK +15% | DEF -25% when not attacking |
+| **Korrath** | ATK +35% (Blood Frenzy) | None (aggression is their defense) |
 | **Sylvaeth** | Counter-ambush (auto-Advantage if scouted) | ATK -30% |
 | **Ashborn** | Reformation/Curse after battle | Cannot be healed |
 | **Breath-Born** | Evasion (10% attacks miss) | DEF -25% when stationary |

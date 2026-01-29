@@ -235,7 +235,7 @@ export class CombatEngine {
    * Get territorial defense bonus (terrain + buildings)
    */
   getTerritoryDefenseBonus(territory: SimTerritory, defender: SimPlayer | null): number {
-    let modifier = BASE_DEFENDER_BONUS; // Start with 25% defender advantage
+    let modifier = BASE_DEFENDER_BONUS; // Start with 50% defender advantage
 
     // Terrain bonuses
     switch (territory.terrain) {
